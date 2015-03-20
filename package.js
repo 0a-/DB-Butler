@@ -9,19 +9,19 @@ Package.describe({
 
 Package.onUse(function(api) {
     api.versionsFrom('1.0.4.1');
-    api.use('mquandalle:harmony');
+    api.use('mquandalle:harmony@1.3.79', both);
     api.addFiles('lib/some_functions_that_help.js', both);
-    api.addFiles('lib/db_operations.js', both);
+    api.addFiles('lib/db_operations_mutable.js', both);
+    api.addFiles('lib/db_operations_readonly.js', both);
     api.addFiles('lib/query.js', both);
-    api.addFiles('lib/butler.js', both);
-    api.addFiles('lib/x_to_many.js', both);
-    api.addFiles('lib/db_butler.js', both);
+    api.addFiles('lib/x_to_many.next.js', both);
+    api.addFiles('lib/db_butler.next.js', both);
     api.addFiles('lib/export.js', both);
-    api.export('lib/export.js',both);
+    api.export('DB_Butler',both);
 });
 
 Package.onTest(function(api) {
-    api.use('tinytest');
     api.use('arch:db-butler');
+    api.use('tinytest');
     api.addFiles('test/basic.js',both);
 });
