@@ -13,7 +13,7 @@ Package.onUse(function(api) {
     api.addFiles('lib/some_functions_that_help.js', both);
     api.addFiles('lib/db_operations_mutable.js', both);
     api.addFiles('lib/db_operations_readonly.js', both);
-    api.addFiles('lib/query.js', both);
+    api.addFiles('lib/query.next.js', both);
     api.addFiles('lib/x_to_many.next.js', both);
     api.addFiles('lib/db_butler.next.js', both);
     api.addFiles('lib/export.js', both);
