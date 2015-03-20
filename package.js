@@ -13,10 +13,11 @@ Package.onUse(function(api) {
     api.addFiles('lib/some_functions_that_help.js', both);
     api.addFiles('lib/db_operations.js', both);
     api.addFiles('lib/query.js', both);
-    api.addFiles('lib/virtual_object.js', both);
+    api.addFiles('lib/butler.js', both);
     api.addFiles('lib/x_to_many.js', both);
-    api.addFiles('lib/db_bulter.js', both);
-    api.export('DB_Bulter',both);
+    api.addFiles('lib/db_butler.js', both);
+    api.addFiles('lib/export.js', both);
+    api.export('lib/export.js',both);
 });
 
 Package.onTest(function(api) {
