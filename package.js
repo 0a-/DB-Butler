@@ -23,6 +23,5 @@ Package.onUse(function(api) {
 Package.onTest(function(api) {
     api.use('tinytest');
     api.use('arch:db-butler');
-    api.addFiles('test/basic_tests.js',both);
-    api.addFiles('test/advanced_tests.js',both);
+    api.addFiles('test/basic.js',both);
 });
