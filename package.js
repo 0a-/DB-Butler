@@ -10,18 +10,21 @@ Package.describe({
 Package.onUse(function(api) {
     api.versionsFrom('1.0.4.1');
     api.use('mquandalle:harmony@1.3.79', both);
+    api.use('mongo', both);
     api.addFiles('lib/some_functions_that_help.js', both);
     api.addFiles('lib/db_operations_mutable.js', both);
     api.addFiles('lib/db_operations_readonly.js', both);
     api.addFiles('lib/query.next.js', both);
     api.addFiles('lib/x_to_many.next.js', both);
+    api.addFiles('lib/butler_objects.js', both);
     api.addFiles('lib/db_butler.next.js', both);
     api.addFiles('lib/export.js', both);
-    api.export('DB_Butler',both);
+    api.export('DBButler',both);
 });
 
 Package.onTest(function(api) {
     api.use('arch:db-butler');
     api.use('tinytest');
-    api.addFiles('test/basic.js',both);
+    api.addFiles('test/init.js','server');
+    api.addFiles('test/basic.js','client');
 });
