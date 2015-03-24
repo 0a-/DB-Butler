@@ -5,7 +5,7 @@ What is DBButler?
 meteor add arch:db-butler
 ```
 
-DBButler manages your Mongo Collections in Meteor. It is basically a library that provides a flexible ORM (Object-relational mapping), hooks and collection schema.
+DBButler manages your Mongo Collections in Meteor. It is basically a library that provides flexible ORM (Object-relational mapping), hooks, collection schema and better coding convention.
 
 It is designed in a way that it's flexible for humans to use, the same time can also be seamlessly integrated into <a href="http://archy.io">Archy.io.</a>
 
@@ -16,7 +16,7 @@ Why uses DBButler?
 
 It is written in vanilla JavaScript (I'm pretty anti-coffeeScript :D ) with closures & prototypes. It does not pretend to be class-based OO. 
 
-And it is super easy to use. 
+And it is super easy to use!
 
 
 Quickstart:
@@ -34,12 +34,12 @@ DBButler.insert({"title":"on anarchism"});
 //this line above will insert into the latest collection DBButler interacted with
 //in this case it is the "book" collection.
 ```
-You can also specify which collection you want to insert:
+Or you can also specify which collection you want to insert by passing the name into first arg:
 ```javascript
 DBButler.insert("book",{"title":"on anarchism"});
 ```
 
-Or you can specify the collection with ".assigned".
+Or using ".assigned()".
 ```javascript
 DBButler.assigned("cat");
 DBButler.insert({"name":"nyanCat"}); // this would insert into "cat"
@@ -50,10 +50,10 @@ DBButler.insert({"name":"nyanCat"}); // this would insert into "cat"
 -------
 ```javascript
 DBButler.prepare({
-colName:"book",
-schema:{
-    title:"string"
-}
+    name:"book",
+    schema:{
+        title:"string"
+    }
 });
 ```
 A schema can be useful later on (for validation, creating forms, giving users' permission, etc). But since we are using noSQL here, it is not really necessary to create a schema for every collection (in this sense it should be viewed as a "partial schema").
@@ -66,21 +66,21 @@ To edit a field of some documents in your collection, you can use `.edit()`.
 DBButler.edit("cat",{"name":"nyanCat"},{"furColor":"white"}); 
 //this would change the furColor to "white" for the documents in "cat" collections that have name "nyanCat".
 ```
-Or it can be simply done without passing "cat" (if it was the last collection DBButler interacted with).
+Or simply do this (if the last collection we interacted was "cat")
 
 ```javascript
 DBButler.edit({"name":"nyanCat"},{"furColor":"white"}); 
 ```
-That's actually the same as doing this:
+That's actually equivalent of doing this:
 ```javascript
 DBButler.find({"name":"nyanCat"}).edit({"furColor":"white"}); 
 ```
-And this is equivalent to doing an update with $set:
+And this's the same as `update()` with $set:
 ```javascript
 DBButler.find({"name":"nyanCat"}).update({$set:{"furColor":"white"}}); 
 ```
 
-Read the docs on flexiablity <a>here</a> to learn more about how you can utilize it.
+Read the <a>docs on flexiablity here</a> to learn more about how you can utilize it.
 
 4. ManyToOne / OneToMany Relation:
 -------------
@@ -95,33 +95,62 @@ Afterwards if you want to insert a document with relation, just uses `.of()`
 
 ```javascript
 DBButler.insert({"title":"on anarchism"}).of("author","Noam Chomsky"); 
-//this will insert {"title":"on anarchism"} into "book" with foreign key "authorId", and {authorName:"Noam Chomsky"} into "author" if there is no Noam Chomsky in "author"
+//this will wait until "author" is prepared and then
+//insert {"title":"on anarchism"} into "book" with foreign key "authorId" of {authorName:"Noam Chomsky"}
+//if there is no Noam Chomsky in "author", it will also insert {authorName:"Noam Chomsky"} into "author"
 DBButler.prepare("author"); 
-//you can prepare "author" any time you want. The insert above will be executed as long as both collections ("books" & "author") are prepared.
+```
+(you can prepare "author" any time you want. The insert above will be executed once both collections ("books" & "author") are prepared.)
+
+You can be more specific with the insert statement:
+
+```javascript
+DBButler.insert({"title":"on anarchism"}).of("author",{authorName:"Noam Chomsky",careerAt: "MIT"});
+//if {authorName:"Noam Chomsky",careerAt: "MIT"} does not exist,
+//it will insert it into "author"
 ```
 
+If you already have the author's _id, you can use this:
 
-This does basically the same thing as the code below. (The code below provides more degrees of freedom for configuring)
+```javascript
+DBBUtler.insert({"title":"on anarchism"}).author(authorId);
+```
+
+The function `.author` here is created depending on name the relation. If no name is specific, it would take the collection name (as the example above).
+
+This is how you can specify the relation and privateKey.
+
 ```javascript
 DBButler.prepare({
-    colName:"book",
+    name:"book",
     ofOne:[{
-        colName:"author", 
+        name:"author", // collection name
         privateKey: "authorId", 
-        relation:["author","book"]
+        relation:["writer","book"] //relation name
     }]
 });
-DBButler.insert({"title":"on anarchism"}).of("author",{authorName: "Noam Chomsky"});
-DBButler.prepare({colName:"author"});
+DBButler.insert({"title":"on anarchism"}).of("writer",{authorName: "Noam Chomsky"});
+DBButler.insert({"title":"on anarchism"}).writer(chomskyId);
 ```
-or you can do it with `.hasMany()` too:
+
+Since oneToMany is just the reverse of ManyToOne, you can also specify the relation between "author" and "book" above with `.hasMany()`.
+
 ```javascript
 DBButler.prepare("author").hasMany("book");
-var chomsky = DBButler.insert({"authorName":"Noam Chomsky"}); 
-//.inserts returns the _id of inserted docuement
-DBButler.prepare({colName:"book"}).insert({"title":"on anarchism"}).author(chomsky); 
-//.author is the same as .of("author",{_id:chomsky});
+DBButler.insert({"authorName":"Noam Chomsky"}).book([{"title":"on anarchism"}]); 
 ```
+
+You can also use `ofMany()` or `of()` for the above insert statement:
+
+```javascript
+DBButler.insert({"authorName":"Noam Chomsky"}).ofMany("book",[{"title":"on anarchism"}]); 
+DBButler.insert({"authorName":"Noam Chomsky"}).of("book",[{"title":"on anarchism"}]); 
+```
+
+`ofMany()` and `of()` are functionally the same here. Just that one would throw an error if the realtion is not OneToMany.
+
+For ManyToOne relation you can also use `ofOne()`.
+
 
 (You can read the docs <a href="">here</a> to learn more about it. There'd also be a simple tutorial.)
 
@@ -195,7 +224,7 @@ Note: since `.get()` uses `.find()`. function attaching to "find" would be calle
 `.increase()` increases the value of a field by n.
 
 ```javascript
-DBButler.find({"name":"nyanCat"}).increase("upvote",1); 
+DBButler.find({"name":"nyanCat"}).increase({"upvote":1}); 
 ```
 `.push()` adds some element to the end of an array.
 
