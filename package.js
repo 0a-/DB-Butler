@@ -11,14 +11,14 @@ Package.onUse(function(api) {
     api.versionsFrom('1.0.4.1');
     api.use('mquandalle:harmony@1.3.79', both);
     api.use('mongo', both);
-    api.addFiles('lib/some_functions_that_help.js', both);
-    api.addFiles('lib/db_operations_mutable.js', both);
-    api.addFiles('lib/db_operations_readonly.js', both);
+    api.addFiles('lib/_someFunctionsThatHelp.next.js', both);
+    api.addFiles('lib/DBOperations/mutableOperations.js', both);
+    api.addFiles('lib/DBOperations/readonlyOperations.js', both);
     api.addFiles('lib/query.next.js', both);
-    api.addFiles('lib/x_to_many.next.js', both);
-    api.addFiles('lib/butler_objects.js', both);
-    api.addFiles('lib/db_butler.next.js', both);
-    api.addFiles('lib/export.js', both);
+    api.addFiles('lib/xToMany.next.js', both);
+    api.addFiles('lib/butlerObjects.js', both);
+    api.addFiles('lib/DBButler.next.js', both);
+    api.addFiles('final.js', both);
     api.export('DBButler',both);
 });
 
