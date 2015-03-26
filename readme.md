@@ -82,7 +82,7 @@ DBButler.find({"name":"nyanCat"}).update({$set:{"furColor":"white"}});
 
 Read the <a>docs on flexiablity here</a> to learn more about how you can utilize it.
 
-4. ManyToOne / OneToMany Relation:
+4. OneToOne / ManyToOne / OneToMany Relation:
 -------------
 
 Now let's say you want to collection "book" to establish a "haveOne" relation with "author",  it can be easily done with `.ofOne()` 

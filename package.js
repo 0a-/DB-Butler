@@ -15,8 +15,11 @@ Package.onUse(function(api) {
     api.addFiles('lib/DBOperations/readonlyOperations.js', both);
     api.addFiles('lib/DBOperations/mutableOperations.next.js', both);
     api.addFiles('lib/query.next.js', both);
-    api.addFiles('lib/xToMany.next.js', both);
-    api.addFiles('lib/butlerObjects.next.js', both);
+    api.addFiles('lib/butlerObjects/ODM.next.js', both);
+    api.addFiles('lib/butlerObjects/butlerCursor.next.js', both);
+    api.addFiles('lib/butlerObjects/butlerDocument.next.js', both);
+    api.addFiles('lib/butlerObjects/butlerCollection.next.js', both);
+    api.addFiles('lib/butlerObjects/make.js', both);
     api.addFiles('lib/DBButler.next.js', both);
     api.addFiles('final.js', both);
     api.export('DBButler',both);
@@ -25,7 +28,7 @@ Package.onUse(function(api) {
 Package.onTest(function(api) {
     api.use('arch:db-butler');
     api.use('tinytest');
-    api.addFiles('test/init.js','server');
-    api.addFiles('test/basicDBOperations.js','client');
-    api.addFiles('test/advanceDBOperations.js','client');
+    api.addFiles('test/init.js',both);
+    api.addFiles('test/basicDBOperations.js',both);
+    api.addFiles('test/basicDBOperations2.js',both);
 });

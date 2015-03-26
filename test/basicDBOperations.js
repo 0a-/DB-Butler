@@ -1,9 +1,8 @@
 
 Tinytest.add('count', function(test){
-  var col = DBButler.prepare("books");
   DBButler.insert({a:"asd"});
   var c = DBButler.count("books",{});
-  test.equal(col.find().count(),c);
+  test.equal(DBButler.collection().find().count(),c);
   DBButler.insert([{a:"asd"},{a:"asd"},{a:"asd"}]);
   var d = DBButler.count();
   test.equal(d,c+3);
