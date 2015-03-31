@@ -1,4 +1,4 @@
-Tinytest.add('upsert', function(test){
+Tinytest.add('upsert & remove', function(test){
   var results = DBButler.get({a:0});
   var selectors = [];
   for(key in results){
@@ -7,13 +7,16 @@ Tinytest.add('upsert', function(test){
     }
   }
   DBButler.remove(selectors);
-  var start = DBButler.count({a:0});
   DBButler.upsert({_id:123},{$set:{a:0}});
-  test.equal(DBButler.count({_id:123}),1+start);
-  var id = DBButler.insert({a:0});
-  test.equal(DBButler.count({a:0}),2+start);
+  var id = 123;
+  test.equal(DBButler.count({a:0}),1);
+  DBButler.remove({_id:id});
+  test.equal(DBButler.count({a:0}),0);
+  id = DBButler.insert({a:0});
+  test.equal(DBButler.count({a:0}),1);
   DBButler.upsert({_id:id},{$set:{a:0}});
-  test.equal(DBButler.count({a:0}),2+start);
+  test.equal(DBButler.count({a:0}),1);
+  DBButler.remove({_id:id});
 });
 
 

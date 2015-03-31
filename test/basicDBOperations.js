@@ -23,5 +23,5 @@ Tinytest.add('update', function(test){
   var start = DBButler.count({a:"x"});
   var z2 = DBButler.edit({_id:id},{a:"x"});
   var end = DBButler.count({a:"x"});
-  test.equal(start+1,end);
+  test.equal(end,start+1);
 });

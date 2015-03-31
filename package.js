@@ -8,7 +8,7 @@ Package.describe({
 });
 
 Package.onUse(function(api) {
-    api.versionsFrom('1.0.4.1');
+    api.versionsFrom('1.0.5');
     api.use('mquandalle:harmony@1.3.79', both);
     api.use('mongo', both);
     api.addFiles('lib/someFunctionsThatHelp.next.js', both);
