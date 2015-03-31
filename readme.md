@@ -5,9 +5,9 @@ What is DBButler?
 meteor add arch:db-butler
 ```
 
-DBButler manages your Mongo Collections in Meteor. It is basically a library that provides flexible ORM (Object-relational mapping), hooks, collection schema and better coding convention.
+DBButler manages your Mongo Collections in Meteor. It is basically a library that provides flexible ODM (Object-documenet mapping), hooks, a bunch of useful functional programming helpers, and better coding convention.
 
-It is designed in a way that it's flexible for humans to use, the same time can also be seamlessly integrated into <a href="http://archy.io">Archy.io.</a>
+It is designed in a way that it's flexible for humans to use, the same time can also be seamlessly integrated into <a target="_blank" href="http://archy.io">Archy, a Meteor app that builds Meteor apps for you</a>.
 
 ----------
 
@@ -21,7 +21,7 @@ And it is super easy to use!
 
 Quickstart:
 ===================
-Or you can read the <a>api</a> here. Tutorial can be found here too.
+Or you can read the API <a target="_blank" href="http://butler.archy.io/api">here</a>. Tutorial can be found <a href="<a target="_blank" href="http://butler.archy.io/tutorial">">here</a>.
 
 1. Create a collection & Insert a document
 -------------
@@ -34,31 +34,8 @@ DBButler.insert({"title":"on anarchism"});
 //this line above will insert into the latest collection DBButler interacted with
 //in this case it is the "book" collection.
 ```
-Or you can also specify which collection you want to insert by passing the name into first arg:
-```javascript
-DBButler.insert("book",{"title":"on anarchism"});
-```
 
-Or using ".assigned()".
-```javascript
-DBButler.assigned("cat");
-DBButler.insert({"name":"nyanCat"}); // this would insert into "cat"
-```
-
-
-2. Create a collection with schema
--------
-```javascript
-DBButler.prepare({
-    name:"book",
-    schema:{
-        title:"string"
-    }
-});
-```
-A schema can be useful later on (for validation, creating forms, giving users' permission, etc). But since we are using noSQL here, it is not really necessary to create a schema for every collection (in this sense it should be viewed as a "partial schema").
-
-3. Edit some document in a collection
+2. Edit some document in a collection
 -------------
 
 To edit a field of some documents in your collection, you can use `.edit()`.
@@ -71,128 +48,108 @@ Or simply do this (if the last collection we interacted was "cat")
 ```javascript
 DBButler.edit({"name":"nyanCat"},{"furColor":"white"}); 
 ```
-That's actually equivalent of doing this:
-```javascript
-DBButler.find({"name":"nyanCat"}).edit({"furColor":"white"}); 
-```
-And this's the same as `update()` with $set:
-```javascript
-DBButler.find({"name":"nyanCat"}).update({$set:{"furColor":"white"}}); 
-```
 
-Read the <a>docs on flexiablity here</a> to learn more about how you can utilize it.
+Read the docs on flexiablity <a>here</a> to learn more about how you can utilize it.
 
-4. OneToOne / ManyToOne / OneToMany Relation:
+3. Declaring One-to-many / Many-to-one Relation + inserting
 -------------
 
-Now let's say you want to collection "book" to establish a "haveOne" relation with "author",  it can be easily done with `.ofOne()` 
-
-```javascript
-DBButler.prepare("book").ofOne("author");
-```
-
-Afterwards if you want to insert a document with relation, just uses `.of()`
-
-```javascript
-DBButler.insert({"title":"on anarchism"}).of("author","Noam Chomsky"); 
-//this will wait until "author" is prepared and then
-//insert {"title":"on anarchism"} into "book" with foreign key "authorId" of {authorName:"Noam Chomsky"}
-//if there is no Noam Chomsky in "author", it will also insert {authorName:"Noam Chomsky"} into "author"
-DBButler.prepare("author"); 
-```
-(you can prepare "author" any time you want. The insert above will be executed once both collections ("books" & "author") are prepared.)
-
-You can be more specific with the insert statement:
-
-```javascript
-DBButler.insert({"title":"on anarchism"}).of("author",{authorName:"Noam Chomsky",careerAt: "MIT"});
-//if {authorName:"Noam Chomsky",careerAt: "MIT"} does not exist,
-//it will insert it into "author"
-```
-
-If you already have the author's _id, you can use this:
-
-```javascript
-DBBUtler.insert({"title":"on anarchism"}).author(authorId);
-```
-
-The function `.author` here is created depending on name the relation. If no name is specific, it would take the collection name (as the example above).
-
-This is how you can specify the relation and privateKey.
-
-```javascript
-DBButler.prepare({
-    name:"book",
-    ofOne:[{
-        name:"author", // collection name
-        privateKey: "authorId", 
-        relation:["writer","book"] //relation name
-    }]
-});
-DBButler.insert({"title":"on anarchism"}).of("writer",{authorName: "Noam Chomsky"});
-DBButler.insert({"title":"on anarchism"}).writer(chomskyId);
-```
-
-Since oneToMany is just the reverse of ManyToOne, you can also specify the relation between "author" and "book" above with `.hasMany()`.
+For the collection "author" to establish a oneToMany relation with "book", you can use `.hasMany()`. Afterwards if you want to insert a document with relation, just uses `.find().insert()`.
 
 ```javascript
 DBButler.prepare("author").hasMany("book");
-DBButler.insert({"authorName":"Noam Chomsky"}).book([{"title":"on anarchism"}]); 
+var NoamChomskyId = DBButler.insert({name:"Noam Chomsky"});
+DBButler.find("author",NoamChomskyId).insert("book",{"title":"on anarchism"}); 
+//this will wait until "book" is prepared and then
+//insert {"title":"on anarchism"} into "book" with foreign key "authorId"
+//if there is no Noam Chomsky in "author", the default behavior is to throw an error
+DBButler.prepare("book");
+```
+(you can prepare "book" any time you want. The insert above will be executed once both collections ("book" & "author") are prepared.)
+
+Note: Unlike `Mongo.collection.find`, `DBButler.find` does not return a cursor; DBButler.find does not do any db operations, what it does is just to prepare an object that has relational-mapping functions like `.insert`, which is different from `DBButler.insert`.
+
+
+For the record, this is the same as `DBButler.prepare("author").hasMany("book")`
+```javascript
+DBButler.prepare("book").hasOne("author");
 ```
 
-You can also use `ofMany()` or `of()` for the above insert statement:
+For many-to-one/one-to-many relation, By default we take the approach of normalizing data: so foreginKey for referencing would be used. If you want to store the "many" as an array for a key in the "one",  pass `{denormalizing:false}` to the 2nd parameter.
 
 ```javascript
-DBButler.insert({"authorName":"Noam Chomsky"}).ofMany("book",[{"title":"on anarchism"}]); 
-DBButler.insert({"authorName":"Noam Chomsky"}).of("book",[{"title":"on anarchism"}]); 
+DBButler.prepare("book").hasOne("author",{denormalizing:true});
 ```
 
-`ofMany()` and `of()` are functionally the same here. Just that one would throw an error if the realtion is not OneToMany.
 
-For ManyToOne relation you can also use `ofOne()`.
-
-
-(You can read the docs <a href="">here</a> to learn more about it. There'd also be a simple tutorial.)
-
-5. ManyToMany Relation
+4. Getting or updating relational data
 -------------
-It can be easily achieved with  `.ofMany` or `.haveMany` (which are functionally equivalent).
-```javascript
-DBButler.prepare("cat").ofMany("awesomeness");
-DBButler.insert({"name":"Noam Chomsky"}).of(
-    ["lingustics","logician","anarcho-syndicalist"]
-);
-DBButler.prepare("awesomeness");
-```
-This would create a mongo collection named "cat_awesomeness_relation" with 4 fields: `_id`, `catId`, `awesomnessId` and `createdOn`.
 
-To customize the schema of this collection, you can do this:
+To get the Noam Chomsky's books:
+```javascript
+DBButler.find("author",NoamChomskyId).get("book"); 
+```
+or
 
 ```javascript
-DBButler.prepare("cat").ofMany("awesomeness",{
-    a:"cat._id", //setting key
-    b:"awesomeness._id", //setting key
-    rating:"integer"
-});
+DBButler.find("author",NoamChomskyId).book(); 
 ```
 
-Or with a JSON object (which is what would be done in Archy.io):
+Update Noam Chomsky's books:
 ```javascript
-DBButler.prepare({
-    colName:"cat",
-    ManyToMany:[{
-        colName: "cat_awesomeness_relation",
-        relation: ["cat","awesomeness"],
-        colSchema:{
-            a:"cat._id", //setting key
-            b:"awesomeness._id", //setting key
-            rating:"integer"
-        }
-    }]
-);
+DBButler.find("author",NoamChomskyId).edit("book",{"awesome":true}); 
 ```
 
-Docs <a>here</a>. Tutorial <a>here</a>.
+or
+
+```javascript
+DBButler.find("author",NoamChomskyId).book("edit",{"awesome":true}); 
+```
+
+5. One-to-one Relation (Implementing)
+
+
+```javascript
+DBButler.prepare("user").oneToOne("profile");
+```
+
+For one-to-one relation, By default we take the approach of denormalizing data: so profile would just be a key of user docuement:  there would only be 1 collection. In the case above, `DBButler.prepare("profile")` would not do anything. And every profile is required to have a user.
+
+To minimize data redundancy & store "user" and "profile" in separate collections, pass `{denormalizing:false}` to the 2nd parameter.
+
+```javascript
+DBButler.prepare("user").ontToOne("profile",{denormalizing:true});
+```
+
+
+6. ManyToMany Relation
+-------------
+
+For all many to many relation, a junction collection is created by default.
+
+```javascript
+DBButle.prepare("programmer").manyToMany("languages"); //this would not only create programmer collection, but programmer_langauges collection (that works as a junction table)
+var archyID = DBButler.insert({"name":"Archy"});
+DBButler.find("programmer",archyID).insert("languages",
+    [{name: "Javascript",OO:"prototype-based"},
+    {name: "Haskell",functional:"purely"},
+    {name: "PHP", OO:"class-based"},
+    {name: "Ruby", OO:"class-based"},
+    {name: "Obj-C", OO:"class-based"},
+    {name: "HTML", declarative:true}]);
+); 
+//this would insert 6 docuements into languages collections
+//and the same time 6 docuements about the relation into programmer_langauges collection
+DBButle.prepare("languages"); 
+
+//note: the insert statement would not insert anything to "languages" if we just pass an array of languages id as the 2nd arguement like this:
+DBButler.find("programmer",archyID).insert("languages", ["asdasd231","sxzsc23"]);
+//this would simply insert 2 docuements about the realtion into programmer_langauges collection if docuements with id "asdasd231","sxzsc23" exist in languages collection
+```
+
+This behavior can once again be altered by passing `{denormalizing:"weak"}` or `{denormalizing:"strong"}` to the 2nd parameter (default value for denormalizing for many-to-many relation is `false`).
+
+Read the doc to learn more.
 
 6. Hooks
 -------------
@@ -218,45 +175,3 @@ DBButler.after("find",{"name":"NyanCat"},function(){
 
 Note: since `.get()` uses `.find()`. function attaching to "find" would be called for "get" event as well.
 
-7. More on basic database interactions
--------------
-
-`.increase()` increases the value of a field by n.
-
-```javascript
-DBButler.find({"name":"nyanCat"}).increase({"upvote":1}); 
-```
-`.push()` adds some element to the end of an array.
-
-```javascript
-DBButler.find({"name":"nyanCat"}).push("catFriends",["GrumpyCat","Maru"]); 
-```
-
-`.find()` simply returns an cursor that not only has Meteor's Mongo.Cursor functions, but also ButlerCursor functions. Learn more <a>here</a>.
-
-```javascript
-DBButler.find({"name":"nyanCat"}); //this returns a cursor 
-```
-
-`.get()` gives you an object with numberical index of docuements found in the collection.
-
-```javascript
-var cats = DBButler.get({"name":"nyanCat"}); //this returns a cursor 
-console.log(cats[0]); //the first cat object
-```
-
-`.getOne()` gives you the first docuement found.
-
-```javascript
-var first_cat = DBButler.getOne({"name":"nyanCat"});
-console.log(first_cat[0]); //the first cat object
-//it has the same properties as cats[0] but also some extra functions.
-```
-
-`.remove()` delete the docuements found.
-
-```javascript
-DBButler.remove({"name":"nyanCat"});
-```
-
-Read the full api <a>here</a> to learn how they work.
