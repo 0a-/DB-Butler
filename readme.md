@@ -1,30 +1,26 @@
-What is DBButler?
-===================
-
-```
-meteor add arch:db-butler
-```
+## What is DBButler? ##
 
 DBButler manages your Mongo Collections in Meteor. It is basically a library that provides flexible ODM (Object-documenet mapping), hooks, a bunch of useful functional programming helpers, and better coding convention.
 
-It is designed in a way that it's flexible for humans to use, the same time can also be seamlessly integrated into <a target="_blank" href="http://archy.io">Archy, a Meteor app that builds Meteor apps for you</a>.
+It is designed in a way that it's flexible for humans to use, the same time can also be seamlessly integrated into <a target="_blank" href="http://archy.io">Archy</a>, a Meteor app that builds Meteor apps for you.
 
-----------
 
-Why uses DBButler?
-===================
+## Why uses DBButler? ##
 
 It is written in vanilla JavaScript (I'm pretty anti-coffeeScript :D ) with closures & prototypes. It does not pretend to be class-based OO. 
 
 And it is super easy to use!
 
+Check out the docs <a target="_blank" href="http://butler.archy.io/api">here</a> and tutorial <a target="_blank" href="http://butler.archy.io/tutorial">here</a>.
 
-Quickstart:
-===================
-Or you can read the API <a target="_blank" href="http://butler.archy.io/api">here</a>. Tutorial can be found <a href="<a target="_blank" href="http://butler.archy.io/tutorial">">here</a>.
 
-1. Create a collection & Insert a document
--------------
+## Quickstart ##
+
+```
+meteor add arch:db-butler
+```
+
+##1. Create a collection & Insert a document ##
 
 To create a collection (with `prepare()`) and insert a record (with `insert()`):
 
@@ -35,8 +31,7 @@ DBButler.insert({"title":"on anarchism"});
 //in this case it is the "book" collection.
 ```
 
-2. Edit some document in a collection
--------------
+## 2. Edit some document in a collection ##
 
 To edit a field of some documents in your collection, you can use `.edit()`.
 ```javascript
@@ -51,10 +46,9 @@ DBButler.edit({"name":"nyanCat"},{"furColor":"white"});
 
 Read the docs on flexiablity <a>here</a> to learn more about how you can utilize it.
 
-3. Declaring One-to-many / Many-to-one Relation + inserting
--------------
+## 3. Declaring One-to-many / Many-to-one Relation + inserting ##
 
-For the collection "author" to establish a oneToMany relation with "book", you can use `.hasMany()`. Afterwards if you want to insert a document with relation, just uses `.find().insert()`.
+For one-to-many: use `.hasMany()`. To insert a document with relation: use `.find().insert()`.
 
 ```javascript
 DBButler.prepare("author").hasMany("book");
@@ -65,65 +59,58 @@ DBButler.find("author",NoamChomskyId).insert("book",{"title":"on anarchism"});
 //if there is no Noam Chomsky in "author", the default behavior is to throw an error
 DBButler.prepare("book");
 ```
-(you can prepare "book" any time you want. The insert above will be executed once both collections ("book" & "author") are prepared.)
 
-Note: Unlike `Mongo.collection.find`, `DBButler.find` does not return a cursor; DBButler.find does not do any db operations, what it does is just to prepare an object that has relational-mapping functions like `.insert`, which is different from `DBButler.insert`.
+>Note: Unlike `Mongo.collection.find`, `DBButler.find` does not return a cursor; DBButler.find does not do any db operations, what it does is just to prepare an object that has relational-mapping functions like `.insert`, which is different from `DBButler.insert`.
 
 
-For the record, this is the same as `DBButler.prepare("author").hasMany("book")`
+For many-to-one, which is just the reverse, use `.hasOne()`
 ```javascript
 DBButler.prepare("book").hasOne("author");
 ```
 
-For many-to-one/one-to-many relation, By default we take the approach of normalizing data: so foreginKey for referencing would be used. If you want to store the "many" as an array for a key in the "one",  pass `{denormalizing:false}` to the 2nd parameter.
+>For many-to-one/one-to-many relation, By default we take the approach of normalizing data: so foreginKey for referencing would be used. 
+
+If you want to store the "many" as an array for a key in the "one":
 
 ```javascript
 DBButler.prepare("book").hasOne("author",{denormalizing:true});
 ```
 
 
-4. Getting or updating relational data
--------------
+## 4. Getting or updating relational data ##
 
-To get the Noam Chomsky's books:
-```javascript
-DBButler.find("author",NoamChomskyId).get("book"); 
-```
-or
+Get an array of books whose author is Noam Chomsky:
 
 ```javascript
+DBButler.find("author",NoamChomskyId).get("book");
+//or
 DBButler.find("author",NoamChomskyId).book(); 
 ```
 
 Update Noam Chomsky's books:
-```javascript
-DBButler.find("author",NoamChomskyId).edit("book",{"awesome":true}); 
-```
-
-or
 
 ```javascript
+DBButler.find("author",NoamChomskyId).edit("book",{"awesome":true});
+//or
 DBButler.find("author",NoamChomskyId).book("edit",{"awesome":true}); 
 ```
 
-5. One-to-one Relation (Implementing)
-
+##5. One-to-one Relation ##
 
 ```javascript
 DBButler.prepare("user").oneToOne("profile");
 ```
 
-For one-to-one relation, By default we take the approach of denormalizing data: so profile would just be a key of user docuement:  there would only be 1 collection. In the case above, `DBButler.prepare("profile")` would not do anything. And every profile is required to have a user.
+>For one-to-one relation, by default we take the approach of denormalizing data: so profile would just be a key of user docuement:  there would only be 1 collection. In the case above, `DBButler.prepare("profile")` would not do anything.
 
-To minimize data redundancy & store "user" and "profile" in separate collections, pass `{denormalizing:false}` to the 2nd parameter.
+To minimize data redundancy & store "user" and "profile" in separate collections"
 
 ```javascript
 DBButler.prepare("user").ontToOne("profile",{denormalizing:true});
 ```
 
 
-6. ManyToMany Relation
--------------
+## 6. ManyToMany Relation ##
 
 For all many to many relation, a junction collection is created by default.
 
@@ -151,8 +138,8 @@ This behavior can once again be altered by passing `{denormalizing:"weak"}` or `
 
 Read the doc to learn more.
 
-6. Hooks
--------------
+## 7. Hooks ##
+
 Hooks are pretty straightforward. They are functions to be called before or after some DBButler event, with `.before()` and `.after()`.
 
 
@@ -173,5 +160,5 @@ DBButler.after("find",{"name":"NyanCat"},function(){
 });
 ```
 
-Note: since `.get()` uses `.find()`. function attaching to "find" would be called for "get" event as well.
+>Note: since `.get()` uses `.find()`. function attaching to "find" would be called for "get" event as well.
 
